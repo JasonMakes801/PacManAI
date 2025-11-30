@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pac-Man "AI" Showdown</title>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Permanent+Marker|Press+Start+2P">
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s;
+        }
+        
+        /* Snowflakes - hidden by default */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #fff;
+            font-size: 1em;
+            text-shadow: 0 0 5px #fff;
+            animation: fall linear infinite;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        body.christmas .snowflake {
+            opacity: 0.8;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5em;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 10000;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        body.christmas .theme-toggle {
+            background: #1a0a0a;
+            border-color: #cc0000;
+        }
+        
+        /* Christmas theme overrides */
+        body.christmas {
+            background-color: #0a1a0a;
+        }
+        body.christmas .controls-panel {
+            background: #1a0a0a;
+            border-color: #cc0000;
+        }
+        body.christmas select {
+            background: #0a1a0a;
+            border-color: #228B22;
+        }
+        body.christmas select:hover {
+            border-color: #FFD700;
+        }
+        body.christmas #pacman {
+            border-color: #cc0000;
+            box-shadow: 0 0 20px rgba(204, 0, 0, 0.3);
+        }
+        body.christmas .info-panel {
+            background: #1a0a0a;
+            border-color: #228B22;
+            box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+        }
+        body.christmas .info-panel h3 {
+            color: #FFD700;
+            border-bottom-color: #228B22;
+        }
+        body.christmas .stats {
+            border-top-color: #228B22;
+        }
+        body.christmas .ghost-info {
+            border-top-color: #228B22 !important;
+        }
+        body.christmas .benchmark-section {
+            border-top-color: #228B22 !important;
+        }
+        body.christmas h1 {
+            color: #ff4444;
+            text-shadow: 3px 3px #228B22;
+        }
+        body.christmas .subtitle {
+            color: #FFD700;
+        }
+        body.christmas .keyboard-hint span {
+            color: #FFD700;
+        }
+        body.christmas .modal-content {
+            background: #1a0a0a;
+            border-color: #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        body.christmas .modal-header {
+            border-bottom-color: #228B22;
+        }
+        body.christmas .results-table th {
+            color: #FFD700;
+            border-bottom-color: #228B22;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-family: 'Permanent Marker', cursive;
+            text-align: center;
+            color: #FFFF00;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px #FF0000;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .subtitle {
+            text-align: center;
+            color: #00FFDE;
+            font-size: 0.7em;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+        .controls-panel {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #111;
+            border: 2px solid #0000FF;
+            border-radius: 10px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .ai-selector {
+            text-align: center;
+        }
+        .ai-selector h3 {
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        .ai-selector.pacman h3 {
+            color: #FFFF00;
+        }
+        .ai-selector.ghost h3 {
+            color: #FF0000;
+        }
+        select {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6em;
+            padding: 8px;
+            background: #000;
+            color: #fff;
+            border: 2px solid #0000FF;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        select:hover {
+            border-color: #00FFDE;
+        }
+        .game-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        #pacman {
+            border: 3px solid #0000FF;
+            border-radius: 5px;
+            width: 475px;
+            max-width: 100%;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        #pacman canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        .info-panel {
+            background: #111;
+            border: 2px solid #0000FF;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            font-size: 0.6em;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        /* Responsive: Portrait / narrow screens - stack vertically */
+        @media (max-width: 767px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .subtitle {
+                font-size: 0.5em;
+            }
+            .controls-panel {
+                flex-direction: column;
+                gap: 15px;
+                padding: 10px;
+            }
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #pacman {
+                width: 100%;
+                max-width: 475px;
+            }
+            .info-panel {
+                width: 100%;
+                max-width: 475px;
+            }
+            .keyboard-hint {
+                font-size: 0.4em;
+            }
+        }
+        
+        /* Landscape on smaller devices */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+            }
+            #pacman {
+                width: auto;
+                flex: 1;
+                max-width: 50%;
+            }
+            .info-panel {
+                width: auto;
+                flex: 1;
+                max-width: 45%;
+            }
+        }
+        
+        /* Tablet portrait */
+        @media (min-width: 768px) and (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .info-panel {
+                width: 475px;
+            }
+        }
+        .info-panel h3 {
+            color: #00FFDE;
+            margin-top: 0;
+            border-bottom: 1px solid #0000FF;
+            padding-bottom: 10px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .algo-info {
+            margin-bottom: 15px;
+        }
+        .algo-info h4 {
+            color: #FFFF00;
+            margin: 10px 0 5px 0;
+        }
+        .algo-info p {
+            color: #aaa;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .stats {
+            border-top: 1px solid #0000FF;
+            padding-top: 10px;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .stat-label {
+            color: #888;
+        }
+        .stat-value {
+            color: #00FF00;
+        }
+        .keyboard-hint {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.5em;
+            color: #666;
+        }
+        .keyboard-hint span {
+            color: #FFFF00;
+            transition: color 0.3s;
+        }
+        #shim {
+            position: absolute;
+            visibility: hidden;
+        }
+        .reset-learning {
+            display: none;
+            margin-top: 10px;
+            padding: 6px 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5em;
+            background: #220022;
+            color: #FF00FF;
+            border: 1px solid #FF00FF;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reset-learning:hover {
+            background: #FF00FF;
+            color: #000;
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #111;
+            border: 3px solid #00FFDE;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 255, 222, 0.3);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0000FF;
+            transition: border-color 0.3s;
+        }
+        .modal-title {
+            color: #00FF00;
+            font-size: 1em;
+            margin: 0;
+        }
+        .modal-close {
+            background: none;
+            border: 2px solid #FF0000;
+            color: #FF0000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7em;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .modal-close:hover {
+            background: #FF0000;
+            color: #000;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7em;
+            margin-bottom: 20px;
+        }
+        .results-table th {
+            text-align: left;
+            padding: 10px 8px;
+            color: #00FFDE;
+            border-bottom: 2px solid #0000FF;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .results-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #333;
+        }
+        .results-table tr:first-child td {
+            color: #FFFF00;
+        }
+        .results-table tr:not(:first-child) td {
+            color: #aaa;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .modal-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55em;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-btn.copy {
+            background: #001133;
+            color: #00FFDE;
+            border: 2px solid #00FFDE;
+        }
+        .modal-btn.copy:hover {
+            background: #00FFDE;
+            color: #000;
+        }
+        .modal-btn.close {
+            background: #220000;
+            color: #FF6666;
+            border: 2px solid #FF6666;
+        }
+        .modal-btn.close:hover {
+            background: #FF6666;
+            color: #000;
+        }
+        .rank-badge {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+        }
+        .rank-1 { color: #FFD700; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+    </style>
+</head>
+<body>
+    <div id="shim">shim for font face</div>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle Christmas Theme">🎄</button>
+    <div class="container">
+        <h1>PAC-MAN OLD-SCHOOL AI SHOWDOWN</h1>
+        <p class="subtitle">Exploring Classic Algorithms</p>
+        
+        <div class="controls-panel">
+            <div class="ai-selector pacman">
+                <h3>PAC-MAN AI</h3>
+                <select id="pacman-ai">
+                    <optgroup label="Reactive">
+                        <option value="random">Random (ancient)</option>
+                        <option value="greedy">Greedy (1950s)</option>
+                    </optgroup>
+                    <optgroup label="Planning">
+                        <option value="astar">A* Pathfinding (1968)</option>
+                    </optgroup>
+                    <optgroup label="Game Theory">
+                        <option value="minimax">Minimax (1950s)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="ai-selector ghost">
+                <h3>GHOSTS</h3>
+                <span style="color: #FF0000; font-size: 0.6em;">Classic 1980s AI</span>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div id="pacman"></div>
+            <div class="info-panel">
+                <h3>ALGORITHM INFO</h3>
+                <div class="algo-info" id="algo-description">
+                    <h4>Greedy Algorithm</h4>
+                    <p>Moves toward nearest pellet. Simple local optimization without planning ahead.</p>
+                </div>
+                <div class="stats">
+                    <h4 style="color: #00FFDE; margin: 0 0 10px 0;">LIVE STATS</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">Nodes Evaluated:</span>
+                        <span class="stat-value" id="nodes-eval">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Avg Decision ms:</span>
+                        <span class="stat-value" id="decision-time">0</span>
+                    </div>
+                    <div class="stat-row" style="display: none;">
+                        <span class="stat-label">Ghost Model:</span>
+                        <span class="stat-value" id="ghost-confidence" style="color: #FF00FF;">0%</span>
+                    </div>
+                    <div class="stat-row" id="observations-row" style="display: none;">
+                        <span class="stat-label">Observations:</span>
+                        <span class="stat-value" id="ghost-observations" style="color: #FF00FF;">0</span>
+                    </div>
+                    <button class="reset-learning" id="reset-learning" title="Clear learned ghost patterns">Reset Learning</button>
+                </div>
+                <div class="ghost-info" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #0000FF;">
+                    <h4 style="color: #FF0000; margin: 0 0 8px 0;">GHOST AI (1980)</h4>
+                    <p style="color: #aaa; font-size: 0.9em; line-height: 1.5;">
+                        <span style="color: #FF0000;">■ Blinky</span> - Direct chase<br>
+                        <span style="color: #FFB8DE;">■ Pinky</span> - Ambush (targets 4 tiles ahead)<br>
+                        <span style="color: #00FFDE;">■ Inky</span> - Flanking (uses Blinky's position)<br>
+                        <span style="color: #FFB847;">■ Clyde</span> - Erratic (chases, then retreats)
+                    </p>
+                    <p style="color: #666; font-size: 0.8em; margin-top: 8px;">No pathfinding - just tile-based targeting. Emergent coordination from simple rules!</p>
+                </div>
+                
+                <!-- Benchmark Section -->
+                <div class="benchmark-section" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #0000FF;">
+                    <h4 style="color: #00FF00; margin: 0 0 8px 0;">BENCHMARK</h4>
+                    <p style="color: #666; font-size: 0.8em; margin-bottom: 10px;">Run each algorithm 100 times to compare performance.</p>
+                    <button id="benchmark-btn" style="
+                        font-family: 'Press Start 2P', cursive;
+                        font-size: 0.5em;
+                        padding: 8px 12px;
+                        background: #002200;
+                        color: #00FF00;
+                        border: 1px solid #00FF00;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        width: 100%;
+                    ">Run Benchmark</button>
+                    <div id="benchmark-status" style="display: none; margin-top: 10px; color: #00FFDE; font-size: 0.9em; text-align: center;"></div>
+                    <div id="benchmark-results" style="display: none; margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="keyboard-hint">
+            <span>N</span> = New Game &nbsp; <span>P</span> = Pause &nbsp; <span>S</span> = Sound
+        </p>
+    </div>
+    
+    <!-- Benchmark Results Modal -->
+    <div class="modal-overlay" id="benchmark-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 BENCHMARK RESULTS</h2>
+                <button class="modal-close" id="modal-close-x">✕</button>
+            </div>
+            <div id="modal-results-body"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn copy" id="modal-copy-btn">📋 Copy as Markdown</button>
+                <button class="modal-btn close" id="modal-close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    
+    <!-- Snowflakes and Theme Toggle -->
+    <script>
+    (function() {
+        // Create snowflakes
+        const flakes = ['❄', '❅', '❆', '✻', '✼'];
+        for (let i = 0; i < 25; i++) {
+            const flake = document.createElement('div');
+            flake.className = 'snowflake';
+            flake.textContent = flakes[Math.floor(Math.random() * flakes.length)];
+            flake.style.left = Math.random() * 100 + 'vw';
+            flake.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            flake.style.animationDelay = (Math.random() * 5) + 's';
+            flake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            document.body.appendChild(flake);
+        }
+        
+        // Theme toggle
+        const toggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('pacman-christmas-theme');
+        if (savedTheme === 'true') {
+            document.body.classList.add('christmas');
+            toggle.textContent = '👻';
+        }
+        
+        toggle.addEventListener('click', function() {
+            document.body.classList.toggle('christmas');
+            const isChristmas = document.body.classList.contains('christmas');
+            toggle.textContent = isChristmas ? '👻' : '🎄';
+            localStorage.setItem('pacman-christmas-theme', isChristmas);
+            // Redraw map to update pellet colors
+            if (typeof GAME !== 'undefined' && GAME.redraw) {
+                GAME.redraw();
+            }
+        });
+    })();
+    </script>
+    
+    <script src="pacman-core.js"></script>
+    <script src="ai-algorithms.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

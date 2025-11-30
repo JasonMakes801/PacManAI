@@ -1,0 +1,10 @@
+# Dev.to article draft (not part of the game)
+devto-article-draft.md
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
