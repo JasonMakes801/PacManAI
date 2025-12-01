@@ -744,9 +744,12 @@ Pacman.Audio = function (game) {
         var f = files[name] = document.createElement("audio");
         var callbackFired = false;
         
+        console.log('[Audio] Loading:', name);
+        
         var fireCallback = function() {
             if (!callbackFired && typeof cb === "function") {
                 callbackFired = true;
+                console.log('[Audio] Ready:', name);
                 cb();
             }
         };
@@ -755,7 +758,10 @@ Pacman.Audio = function (game) {
         f.addEventListener("canplaythrough", progressEvents[name], true);
         
         // iOS Safari won't preload audio - add timeout fallback
-        setTimeout(fireCallback, 500);
+        setTimeout(function() {
+            console.log('[Audio] Timeout fallback for:', name);
+            fireCallback();
+        }, 500);
         
         f.setAttribute("preload", "true");
         f.setAttribute("autobuffer", "true");
