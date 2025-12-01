@@ -922,14 +922,23 @@ var GAME = (function () {
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Init] DOMContentLoaded fired');
+    console.log('[Init] Modernizr.canvas:', Modernizr.canvas);
+    console.log('[Init] Modernizr.localstorage:', Modernizr.localstorage);
+    console.log('[Init] Modernizr.audio:', Modernizr.audio);
+    console.log('[Init] Modernizr.audio.ogg:', Modernizr.audio.ogg);
+    console.log('[Init] Modernizr.audio.mp3:', Modernizr.audio.mp3);
+    
     var el = document.getElementById("pacman");
     
     if (Modernizr.canvas && Modernizr.localstorage && 
         Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
+        console.log('[Init] Modernizr checks passed, calling GAME.init');
         window.setTimeout(function () { 
             GAME.init(el, "https://raw.githubusercontent.com/daleharvey/pacman/master/"); 
         }, 0);
     } else {
+        console.log('[Init] Modernizr checks FAILED');
         el.innerHTML = "Sorry, needs a modern browser<br /><small>" +
             "(Firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
     }
