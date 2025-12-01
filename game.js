@@ -749,16 +749,11 @@ var GAME = (function () {
         
         map.drawPills(ctx);
         
-        // Detect touch device for appropriate message
-        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        var startMessage = isTouchDevice ? "Tap to Start" : "Tap or Press N";
-        
         if (state === PLAYING) {
             mainDraw();
         } else if (state === WAITING && stateChanged) {
             stateChanged = false;
             map.draw(ctx);
-            dialog(startMessage);
         } else if (state === EATEN_PAUSE && (tick - timerStart) > (Pacman.FPS / 3)) {
             map.draw(ctx);
             setState(PLAYING);
@@ -911,6 +906,14 @@ var GAME = (function () {
         "getTick": getTick,
         "redraw": function() { if (map && ctx) map.draw(ctx); },
         "newGame": startNewGame,
+        "getState": function() {
+            if (state === WAITING) return 'waiting';
+            if (state === PLAYING) return 'playing';
+            if (state === PAUSE) return 'paused';
+            if (state === COUNTDOWN) return 'countdown';
+            if (state === DYING) return 'dying';
+            return 'other';
+        },
         "togglePause": function() {
             if (state === PAUSE) {
                 audio.resume();

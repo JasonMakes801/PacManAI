@@ -185,7 +185,7 @@
         #pacman {
             border: 3px solid #0000FF;
             border-radius: 5px;
-            flex: 1 1 380px;
+            flex: 1 1 450px;
             max-width: 475px;
             min-width: 280px;
             transition: border-color 0.3s, box-shadow 0.3s;
@@ -199,15 +199,15 @@
             border: 2px solid #0000FF;
             border-radius: 10px;
             padding: 15px;
-            flex: 1 1 200px;
-            max-width: 280px;
+            flex: 1 1 300px;
+            max-width: 475px;
             min-width: 200px;
             font-size: 0.6em;
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
         
         /* Responsive: Portrait / narrow screens - stack vertically */
-        @media (max-width: 600px) {
+        @media (max-width: 767px) {
             body {
                 padding: 10px;
             }
@@ -465,6 +465,23 @@
         <div class="game-container">
             <div id="pacman"></div>
             <div class="info-panel">
+                <!-- Game Controls -->
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <button id="start-btn" style="
+                        -webkit-appearance: none;
+                        appearance: none;
+                        flex: 1;
+                        font-family: 'Press Start 2P', cursive;
+                        font-size: 0.6em;
+                        padding: 10px 8px;
+                        background: #003300;
+                        color: #00FF00;
+                        border: 2px solid #00FF00;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    ">START</button>
+                </div>
+                
                 <h3>ALGORITHM INFO</h3>
                 <div class="algo-info" id="algo-description">
                     <h4>Greedy Algorithm</h4>
@@ -580,5 +597,70 @@
     <script src="pacman-core.js"></script>
     <script src="ai-algorithms.js"></script>
     <script src="game.js"></script>
+    
+    <script>
+    // Simple button handlers - runs after game.js loads
+    document.addEventListener('DOMContentLoaded', function() {
+        var startBtn = document.getElementById('start-btn');
+        
+        // Always enable sound
+        localStorage.removeItem('soundDisabled');
+        
+        // Track if game is running
+        var isPlaying = false;
+        var isPaused = false;
+        
+        function updateStartBtn() {
+            if (isPaused) {
+                startBtn.textContent = 'RESUME';
+                startBtn.style.background = '#333300';
+                startBtn.style.borderColor = '#FFFF00';
+                startBtn.style.color = '#FFFF00';
+            } else if (isPlaying) {
+                startBtn.textContent = 'PAUSE';
+                startBtn.style.background = '#330000';
+                startBtn.style.borderColor = '#FF6666';
+                startBtn.style.color = '#FF6666';
+            } else {
+                startBtn.textContent = 'START';
+                startBtn.style.background = '#003300';
+                startBtn.style.borderColor = '#00FF00';
+                startBtn.style.color = '#00FF00';
+            }
+        }
+        
+        startBtn.addEventListener('click', function() {
+            if (typeof GAME === 'undefined') return;
+            
+            if (!isPlaying) {
+                // Start new game
+                GAME.newGame();
+                isPlaying = true;
+                isPaused = false;
+            } else if (isPaused) {
+                // Resume
+                GAME.togglePause();
+                isPaused = false;
+            } else {
+                // Pause
+                var result = GAME.togglePause();
+                if (result === true) isPaused = true;
+            }
+            updateStartBtn();
+        });
+        
+        // Listen for game state changes (death resets to waiting)
+        setInterval(function() {
+            if (typeof GAME !== 'undefined' && GAME.getState) {
+                var state = GAME.getState();
+                if (state === 'waiting' && isPlaying) {
+                    isPlaying = false;
+                    isPaused = false;
+                    updateStartBtn();
+                }
+            }
+        }, 100);
+    });
+    </script>
 </body>
 </html>
