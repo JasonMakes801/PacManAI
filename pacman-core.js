@@ -256,6 +256,7 @@ Pacman.Ghost = function (game, map, colour, index) {
         var low = game.getTick() % 10 > 5 ? -3 : 3;
 
         // Use Christmas pattern with ghost's own color, or regular color
+        // TODO: To really sell Christmas mode, add character adornments (Santa hat on Pac-Man, elf hats on ghosts, etc.)
         var ghostColor = getColour();
         var isChristmas = document.body.classList.contains('christmas') && !eatable && !eaten;
         

@@ -2,7 +2,7 @@
 
 A Pac-Man clone with selectable AI algorithms. Watch Greedy, Random, A*, and Minimax battle the classic ghost AI from 1980.
 
-**[Play it live →](https://yourusername.github.io/PacManAI/)**
+**[Play it live →](https://jasonmakes801.github.io/PacManAI/)**
 
 ## Run Locally
 
