@@ -105,9 +105,6 @@
         body.christmas .subtitle {
             color: #FFD700;
         }
-        body.christmas .keyboard-hint span {
-            color: #FFD700;
-        }
         body.christmas .modal-content {
             background: #1a0a0a;
             border-color: #FFD700;
@@ -239,9 +236,6 @@
                 width: 100%;
                 max-width: 100%;
             }
-            .keyboard-hint {
-                font-size: 0.4em;
-            }
         }
         
         /* Landscape on smaller devices */
@@ -259,6 +253,30 @@
                 flex: 1 1 auto;
                 max-width: 45%;
             }
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .action-btn {
+            flex: 1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5em;
+            padding: 8px 4px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #0000FF;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: #333;
+            border-color: #00FFDE;
+        }
+        .action-btn:active {
+            transform: scale(0.95);
         }
         .info-panel h3 {
             color: #00FFDE;
@@ -295,16 +313,6 @@
         }
         .stat-value {
             color: #00FF00;
-        }
-        .keyboard-hint {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 0.5em;
-            color: #666;
-        }
-        .keyboard-hint span {
-            color: #FFFF00;
-            transition: color 0.3s;
         }
         #shim {
             position: absolute;
@@ -481,6 +489,13 @@
         <div class="game-container">
             <div id="pacman"></div>
             <div class="info-panel">
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="new-game-btn" class="action-btn">▶ New</button>
+                    <button id="pause-btn" class="action-btn">⏸ Pause</button>
+                    <button id="sound-btn" class="action-btn">🔊</button>
+                </div>
+                
                 <h3>ALGORITHM INFO</h3>
                 <div class="algo-info" id="algo-description">
                     <h4>Greedy Algorithm</h4>
@@ -537,11 +552,6 @@
                 </div>
             </div>
         </div>
-
-        <p class="keyboard-hint">
-            <span>N</span> = New Game &nbsp; <span>P</span> = Pause &nbsp; <span>S</span> = Sound
-            <br><small style="font-size: 0.7em; opacity: 0.7;">(or tap the game to start)</small>
-        </p>
     </div>
     
     <!-- Benchmark Results Modal -->

@@ -862,6 +862,39 @@ var GAME = (function () {
             }
         });
         
+        // Action buttons
+        document.getElementById('new-game-btn').addEventListener('click', function() {
+            startNewGame();
+        });
+        
+        document.getElementById('pause-btn').addEventListener('click', function() {
+            if (state === PAUSE) {
+                audio.resume();
+                map.draw(ctx);
+                setState(stored);
+                this.textContent = '⏸ Pause';
+            } else if (state === PLAYING || state === COUNTDOWN) {
+                stored = state;
+                setState(PAUSE);
+                audio.pause();
+                map.draw(ctx);
+                dialog("PAUSED");
+                this.textContent = '▶ Resume';
+            }
+        });
+        
+        document.getElementById('sound-btn').addEventListener('click', function() {
+            audio.disableSound();
+            localStorage["soundDisabled"] = !soundDisabled();
+            this.textContent = soundDisabled() ? '🔇' : '🔊';
+        });
+        
+        // Initialize sound button state
+        var soundBtn = document.getElementById('sound-btn');
+        if (soundBtn) {
+            soundBtn.textContent = soundDisabled() ? '🔇' : '🔊';
+        }
+        
         updateAlgoDescription();
         
         var extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
