@@ -749,11 +749,16 @@ var GAME = (function () {
         
         map.drawPills(ctx);
         
+        // Detect touch device for appropriate message
+        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        var startMessage = isTouchDevice ? "Tap to Start" : "Tap or Press N";
+        
         if (state === PLAYING) {
             mainDraw();
         } else if (state === WAITING && stateChanged) {
             stateChanged = false;
             map.draw(ctx);
+            dialog(startMessage);
         } else if (state === EATEN_PAUSE && (tick - timerStart) > (Pacman.FPS / 3)) {
             map.draw(ctx);
             setState(PLAYING);
