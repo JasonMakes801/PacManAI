@@ -754,7 +754,6 @@ var GAME = (function () {
         } else if (state === WAITING && stateChanged) {
             stateChanged = false;
             map.draw(ctx);
-            dialog("Press N to Start");
         } else if (state === EATEN_PAUSE && (tick - timerStart) > (Pacman.FPS / 3)) {
             map.draw(ctx);
             setState(PLAYING);
@@ -862,48 +861,6 @@ var GAME = (function () {
             }
         });
         
-        // Action buttons
-        var newGameBtn = document.getElementById('new-game-btn');
-        var pauseBtn = document.getElementById('pause-btn');
-        var soundBtn = document.getElementById('sound-btn');
-        
-        if (newGameBtn) {
-            newGameBtn.addEventListener('click', function() {
-                console.log('[Button] New Game clicked');
-                startNewGame();
-            });
-        }
-        
-        if (pauseBtn) {
-            pauseBtn.addEventListener('click', function() {
-                console.log('[Button] Pause clicked, state:', state);
-                if (state === PAUSE) {
-                    audio.resume();
-                    map.draw(ctx);
-                    setState(stored);
-                    this.textContent = '⏸ Pause';
-                } else if (state === PLAYING || state === COUNTDOWN) {
-                    stored = state;
-                    setState(PAUSE);
-                    audio.pause();
-                    map.draw(ctx);
-                    dialog("PAUSED");
-                    this.textContent = '▶ Resume';
-                }
-            });
-        }
-        
-        if (soundBtn) {
-            soundBtn.addEventListener('click', function() {
-                console.log('[Button] Sound clicked');
-                audio.disableSound();
-                localStorage["soundDisabled"] = !soundDisabled();
-                this.textContent = soundDisabled() ? '🔇' : '🔊';
-            });
-            // Initialize sound button state
-            soundBtn.textContent = soundDisabled() ? '🔇' : '🔊';
-        }
-        
         updateAlgoDescription();
         
         var extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
@@ -929,10 +886,17 @@ var GAME = (function () {
     }
     
     function loaded() {
-        // No message needed - New button has pulse animation
-        
         document.addEventListener("keydown", keyDown, true);
         document.addEventListener("keypress", keyPress, true);
+        
+        // Tap canvas to start (works on mobile and desktop)
+        var canvas = document.querySelector('#pacman canvas');
+        if (canvas) {
+            canvas.style.cursor = 'pointer';
+            canvas.addEventListener('click', function() {
+                if (state === WAITING) startNewGame();
+            });
+        }
         
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     }

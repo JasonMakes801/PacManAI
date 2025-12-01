@@ -254,40 +254,6 @@
                 max-width: 45%;
             }
         }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .action-btn {
-            flex: 1;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5em;
-            padding: 8px 4px;
-            background: #222;
-            color: #fff;
-            border: 1px solid #0000FF;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .action-btn:hover {
-            background: #333;
-            border-color: #00FFDE;
-        }
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-        #new-game-btn {
-            animation: pulse 2s infinite;
-            background: #002200;
-            border-color: #00FF00;
-            color: #00FF00;
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 5px #00FF00; }
-            50% { box-shadow: 0 0 15px #00FF00, 0 0 25px #00FF00; }
-        }
         .info-panel h3 {
             color: #00FFDE;
             margin-top: 0;
@@ -499,13 +465,6 @@
         <div class="game-container">
             <div id="pacman"></div>
             <div class="info-panel">
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button id="new-game-btn" class="action-btn">▶ New</button>
-                    <button id="pause-btn" class="action-btn">⏸ Pause</button>
-                    <button id="sound-btn" class="action-btn">🔊</button>
-                </div>
-                
                 <h3>ALGORITHM INFO</h3>
                 <div class="algo-info" id="algo-description">
                     <h4>Greedy Algorithm</h4>
