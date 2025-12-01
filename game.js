@@ -887,9 +887,29 @@ var GAME = (function () {
     }
     
     function loaded() {
-        dialog("Press N to Start");
+        // Detect touch device
+        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        dialog(isTouchDevice ? "Tap to Start" : "Press N to Start");
+        
         document.addEventListener("keydown", keyDown, true);
         document.addEventListener("keypress", keyPress, true);
+        
+        // Add touch/click support for starting game
+        var canvas = document.querySelector('#pacman canvas');
+        if (canvas) {
+            canvas.addEventListener('click', function(e) {
+                if (state === WAITING) {
+                    startNewGame();
+                }
+            });
+            canvas.addEventListener('touchend', function(e) {
+                if (state === WAITING) {
+                    e.preventDefault();
+                    startNewGame();
+                }
+            });
+        }
+        
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     }
     
