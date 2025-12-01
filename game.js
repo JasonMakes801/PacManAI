@@ -889,7 +889,7 @@ var GAME = (function () {
     function loaded() {
         // Detect touch device
         var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        dialog(isTouchDevice ? "Tap to Start" : "Press N to Start");
+        dialog(isTouchDevice ? "Tap to Start" : "Press N or Tap to Start");
         
         document.addEventListener("keydown", keyDown, true);
         document.addEventListener("keypress", keyPress, true);
