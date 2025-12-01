@@ -863,35 +863,44 @@ var GAME = (function () {
         });
         
         // Action buttons
-        document.getElementById('new-game-btn').addEventListener('click', function() {
-            startNewGame();
-        });
-        
-        document.getElementById('pause-btn').addEventListener('click', function() {
-            if (state === PAUSE) {
-                audio.resume();
-                map.draw(ctx);
-                setState(stored);
-                this.textContent = '⏸ Pause';
-            } else if (state === PLAYING || state === COUNTDOWN) {
-                stored = state;
-                setState(PAUSE);
-                audio.pause();
-                map.draw(ctx);
-                dialog("PAUSED");
-                this.textContent = '▶ Resume';
-            }
-        });
-        
-        document.getElementById('sound-btn').addEventListener('click', function() {
-            audio.disableSound();
-            localStorage["soundDisabled"] = !soundDisabled();
-            this.textContent = soundDisabled() ? '🔇' : '🔊';
-        });
-        
-        // Initialize sound button state
+        var newGameBtn = document.getElementById('new-game-btn');
+        var pauseBtn = document.getElementById('pause-btn');
         var soundBtn = document.getElementById('sound-btn');
+        
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', function() {
+                console.log('[Button] New Game clicked');
+                startNewGame();
+            });
+        }
+        
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', function() {
+                console.log('[Button] Pause clicked, state:', state);
+                if (state === PAUSE) {
+                    audio.resume();
+                    map.draw(ctx);
+                    setState(stored);
+                    this.textContent = '⏸ Pause';
+                } else if (state === PLAYING || state === COUNTDOWN) {
+                    stored = state;
+                    setState(PAUSE);
+                    audio.pause();
+                    map.draw(ctx);
+                    dialog("PAUSED");
+                    this.textContent = '▶ Resume';
+                }
+            });
+        }
+        
         if (soundBtn) {
+            soundBtn.addEventListener('click', function() {
+                console.log('[Button] Sound clicked');
+                audio.disableSound();
+                localStorage["soundDisabled"] = !soundDisabled();
+                this.textContent = soundDisabled() ? '🔇' : '🔊';
+            });
+            // Initialize sound button state
             soundBtn.textContent = soundDisabled() ? '🔇' : '🔊';
         }
         
@@ -920,28 +929,10 @@ var GAME = (function () {
     }
     
     function loaded() {
-        // Detect touch device
-        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        dialog(isTouchDevice ? "Tap to Start" : "Press N or Tap to Start");
+        // No message needed - New button has pulse animation
         
         document.addEventListener("keydown", keyDown, true);
         document.addEventListener("keypress", keyPress, true);
-        
-        // Add touch/click support for starting game
-        var canvas = document.querySelector('#pacman canvas');
-        if (canvas) {
-            canvas.addEventListener('click', function(e) {
-                if (state === WAITING) {
-                    startNewGame();
-                }
-            });
-            canvas.addEventListener('touchend', function(e) {
-                if (state === WAITING) {
-                    e.preventDefault();
-                    startNewGame();
-                }
-            });
-        }
         
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     }
@@ -949,7 +940,30 @@ var GAME = (function () {
     return {
         "init": init,
         "getTick": getTick,
-        "redraw": function() { if (map && ctx) map.draw(ctx); }
+        "redraw": function() { if (map && ctx) map.draw(ctx); },
+        "newGame": startNewGame,
+        "togglePause": function() {
+            if (state === PAUSE) {
+                audio.resume();
+                map.draw(ctx);
+                setState(stored);
+                return false; // not paused
+            } else if (state === PLAYING || state === COUNTDOWN) {
+                stored = state;
+                setState(PAUSE);
+                audio.pause();
+                map.draw(ctx);
+                dialog("PAUSED");
+                return true; // paused
+            }
+            return null; // no change
+        },
+        "toggleSound": function() {
+            audio.disableSound();
+            localStorage["soundDisabled"] = !soundDisabled();
+            return soundDisabled();
+        },
+        "soundDisabled": soundDisabled
     };
 }());
 
